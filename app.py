@@ -17,7 +17,7 @@ if uploaded_file:
         sheet_name = st.selectbox("Select the sheet to process", excel_data.sheet_names)
         data = excel_data.parse(sheet_name)
 
-        # Display column letters for better identification
+        # Display the preview of the data
         st.write("Preview of the data:")
         st.dataframe(data.head())
 
@@ -48,8 +48,10 @@ if uploaded_file:
                     value_name='Quantity'
                 ).dropna()
 
-                # Map Size column to header values
-                transformed_data['Size'] = transformed_data['Size'].apply(lambda x: x if isinstance(x, str) else str(x))
+                # Ensure Size column reflects the correct header values (using original header row)
+                size_headers = data.columns[start_idx:end_idx]
+                size_mapping = {col: col for col in size_headers}
+                transformed_data['Size'] = transformed_data['Size'].map(size_mapping)
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
