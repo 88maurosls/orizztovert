@@ -40,6 +40,9 @@ if uploaded_file:
                 id_vars = data.columns[:start_idx]
                 value_vars = data.columns[start_idx:end_idx]
 
+                # Use original headers for 'Size'
+                size_headers = list(value_vars)
+
                 # Transform the data
                 transformed_data = data.melt(
                     id_vars=id_vars,
@@ -47,6 +50,9 @@ if uploaded_file:
                     var_name='Size',
                     value_name='Quantity'
                 ).dropna()
+
+                # Map 'Size' column to original headers
+                transformed_data['Size'] = transformed_data['Size'].apply(lambda x: size_headers[value_vars.get_loc(x)] if x in value_vars else x)
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
