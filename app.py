@@ -31,8 +31,8 @@ if uploaded_file:
             data.columns = data.iloc[header_row]
             data = data[header_row + 1:].reset_index(drop=True)
 
-            # Ensure unique column names
-            data.columns = pd.io.parsers.ParserBase({'names': data.columns})._maybe_dedup_names(data.columns)
+            # Ensure unique column names by appending suffixes to duplicates
+            data.columns = pd.Series(data.columns).apply(lambda x: f"{x}_" if pd.Series(data.columns).duplicated().any() else x)
 
             # Validate column range
             start_idx = ord(start_col.upper()) - 65
