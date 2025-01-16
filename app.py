@@ -51,7 +51,7 @@ if uploaded_file:
                 ).dropna()
 
                 # Ensure Size column reflects the correct header values
-                transformed_data['Size'] = transformed_data['Size'].str.extract(r'\((.*?)\)')[0].fillna(transformed_data['Size'])
+                transformed_data['Size'] = transformed_data['Size'].astype(str)
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
