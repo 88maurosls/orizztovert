@@ -16,13 +16,17 @@ if uploaded_file:
         excel_data = pd.ExcelFile(uploaded_file)
         sheet_name = st.selectbox("Select the sheet to process", excel_data.sheet_names)
         data = excel_data.parse(sheet_name)
+
+        # Display column letters for better identification
+        data.columns = [f"{col} (Column {chr(65 + i)})" for i, col in enumerate(data.columns)]
+
         st.write("Preview of the data:")
         st.dataframe(data.head())
 
         # Inputs for header row and column ranges
         header_row = st.number_input("Enter the header row number (0-indexed)", min_value=0, max_value=len(data)-1, step=1)
-        start_col = st.text_input("Enter the column name where sizes start (e.g., 'C')")
-        end_col = st.text_input("Enter the column name where sizes end (e.g., 'Z')")
+        start_col = st.text_input("Enter the column letter where sizes start (e.g., 'C')")
+        end_col = st.text_input("Enter the column letter where sizes end (e.g., 'Z')")
 
         if st.button("Transform Data"):
             # Adjust header and subset data
@@ -30,10 +34,10 @@ if uploaded_file:
             data = data[header_row + 1:].reset_index(drop=True)
 
             # Validate column range
-            if start_col in data.columns and end_col in data.columns:
-                start_idx = data.columns.get_loc(start_col)
-                end_idx = data.columns.get_loc(end_col) + 1
-                
+            start_idx = ord(start_col.upper()) - 65
+            end_idx = ord(end_col.upper()) - 65 + 1
+
+            if 0 <= start_idx < len(data.columns) and 0 <= end_idx <= len(data.columns):
                 # Transform the data
                 transformed_data = data.melt(
                     id_vars=data.columns[:start_idx],
@@ -60,7 +64,6 @@ if uploaded_file:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
             else:
-                st.error("Invalid column names for size range. Please check your input.")
+                st.error("Invalid column letters for size range. Please check your input.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
-
