@@ -35,6 +35,16 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
 st.title("Trasposizione di Colonne Taglie in Verticale")
 st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre (es. taglie). Le altre colonne rimarranno invariate.")
 
+# Esempio di file da scaricare
+st.markdown("### Esempio di file")
+with open("eg.jpg", "rb") as file_example:
+    st.download_button(
+        label="Scarica il file di esempio",
+        data=file_example,
+        file_name="eg.jpg",
+        mime="image/jpeg"
+    )
+
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 
