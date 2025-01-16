@@ -31,6 +31,9 @@ if uploaded_file:
             data.columns = data.iloc[header_row]
             data = data[header_row + 1:].reset_index(drop=True)
 
+            # Ensure unique column names
+            data.columns = pd.io.parsers.ParserBase({'names': data.columns})._maybe_dedup_names(data.columns)
+
             # Validate column range
             start_idx = ord(start_col.upper()) - 65
             end_idx = ord(end_col.upper()) - 65 + 1
@@ -49,9 +52,7 @@ if uploaded_file:
                 ).dropna()
 
                 # Ensure Size column reflects the correct header values (using original header row)
-                size_headers = data.columns[start_idx:end_idx]
-                size_mapping = {col: col for col in size_headers}
-                transformed_data['Size'] = transformed_data['Size'].map(size_mapping)
+                transformed_data['Size'] = transformed_data['Size'].astype(str)
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
