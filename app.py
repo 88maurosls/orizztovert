@@ -1,29 +1,30 @@
 import streamlit as st
 import pandas as pd
 import io
+from openpyxl.utils import column_index_from_string
 
 # Funzione per trasporre taglie da un range di colonne
 def trasponi_taglie(file, colonna_inizio, colonna_fine):
     # Leggi il file Excel
     df = pd.read_excel(file, engine="openpyxl")
     
-    # Converti i nomi delle colonne in indici
-    colonne = df.columns
-    col_inizio_idx = colonne.get_loc(colonna_inizio)
-    col_fine_idx = colonne.get_loc(colonna_fine) + 1  # Include la colonna finale
+    # Converti i riferimenti delle colonne (lettere) in indici numerici
+    col_inizio_idx = column_index_from_string(colonna_inizio) - 1  # Indici 0-based
+    col_fine_idx = column_index_from_string(colonna_fine)          # Indici 0-based + 1 per includere la colonna fine
     
     # Isola le colonne del range specificato
-    taglie_selezionate = colonne[col_inizio_idx:col_fine_idx]
-    
+    taglie_selezionate = df.iloc[:, col_inizio_idx:col_fine_idx]  # Seleziona le colonne del range
+    taglie_selezionate.columns = df.columns[col_inizio_idx:col_fine_idx]  # Mantieni i nomi originali delle colonne
+
     # Crea una lista per il dataframe trasposto
     righe = []
     for _, row in df.iterrows():
-        for taglia in taglie_selezionate:
-            if not pd.isna(row[taglia]):  # Salta celle vuote
+        for colonna in taglie_selezionate.columns:
+            if not pd.isna(row[colonna]):  # Salta celle vuote
                 righe.append({
                     "Index": row["Index"],
-                    "Taglia": taglia,
-                    "Quantità": row[taglia]
+                    "Taglia": colonna,
+                    "Quantità": row[colonna]
                 })
     
     # Crea un nuovo dataframe
