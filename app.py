@@ -2,17 +2,21 @@ import streamlit as st
 import pandas as pd
 import io
 
-# Funzione per trasporre le taglie selezionate
-def trasponi_taglie(file, range_taglie):
-    # Legge il file Excel caricato
+# Funzione per trasporre taglie da un range di colonne
+def trasponi_taglie(file, colonna_inizio, colonna_fine):
+    # Leggi il file Excel
     df = pd.read_excel(file, engine="openpyxl")
     
-    # Trova le colonne corrispondenti al range di taglie
-    taglie_selezionate = [col for col in df.columns if col in range_taglie]
+    # Converti i nomi delle colonne in indici
+    colonne = df.columns
+    col_inizio_idx = colonne.get_loc(colonna_inizio)
+    col_fine_idx = colonne.get_loc(colonna_fine) + 1  # Include la colonna finale
+    
+    # Isola le colonne del range specificato
+    taglie_selezionate = colonne[col_inizio_idx:col_fine_idx]
     
     # Crea una lista per il dataframe trasposto
     righe = []
-    
     for _, row in df.iterrows():
         for taglia in taglie_selezionate:
             if not pd.isna(row[taglia]):  # Salta celle vuote
@@ -22,25 +26,25 @@ def trasponi_taglie(file, range_taglie):
                     "Quantità": row[taglia]
                 })
     
-    # Converte in dataframe
+    # Crea un nuovo dataframe
     df_trasposto = pd.DataFrame(righe)
     return df_trasposto
 
 # Interfaccia Streamlit
 st.title("Trasposizione Taglie in Verticale")
-st.write("Carica il tuo file Excel e specifica un range di taglie.")
+st.write("Carica il tuo file Excel e specifica il range di colonne in cui si trovano le taglie.")
 
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 
-# Range di taglie da selezionare
-range_taglie = st.text_input("Inserisci le taglie (separate da virgola)", value="5, 6, 7, 8, 9")
-range_taglie = [taglia.strip() for taglia in range_taglie.split(",")]
+# Input per specificare il range di colonne
+colonna_inizio = st.text_input("Colonna di inizio (es. C)")
+colonna_fine = st.text_input("Colonna di fine (es. Y)")
 
-if file and st.button("Trasponi"):
+if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
     try:
         # Trasforma il file e crea il nuovo dataframe
-        nuovo_df = trasponi_taglie(file, range_taglie)
+        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine)
         
         # Salva in un file Excel temporaneo
         output = io.BytesIO()
