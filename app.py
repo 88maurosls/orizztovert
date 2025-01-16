@@ -21,8 +21,9 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
     for _, row in df.iterrows():
         for colonna in colonne_taglie.columns:
             if not pd.isna(row[colonna]):  # Salta celle vuote
-                riga = {col: row[col] for col in altre_colonne.columns}  # Copia tutte le altre colonne
-                riga["Taglia"] = colonna  # Aggiungi la colonna trasposta
+                riga = row[:col_inizio_idx].to_dict()  # Copia valori prima del range
+                riga.update(row[col_fine_idx:].to_dict())  # Copia valori dopo il range
+                riga["Taglia"] = colonna  # Nome della colonna trasposta
                 riga["Quantità"] = row[colonna]  # Valore corrispondente
                 righe.append(riga)
 
