@@ -38,16 +38,20 @@ if uploaded_file:
             end_idx = ord(end_col.upper()) - 65 + 1
 
             if 0 <= start_idx < len(data.columns) and 0 <= end_idx <= len(data.columns):
+                # Correctly extract the relevant columns for melting
+                id_vars = list(data.columns[:start_idx])
+                value_vars = list(data.columns[start_idx:end_idx])
+
                 # Transform the data
                 transformed_data = data.melt(
-                    id_vars=data.columns[:start_idx],
-                    value_vars=data.columns[start_idx:end_idx],
+                    id_vars=id_vars,
+                    value_vars=value_vars,
                     var_name='Size',
                     value_name='Quantity'
                 ).dropna()
 
-                # Ensure headers are correctly set
-                transformed_data.columns = ["Index", "Total", "Size", "Quantity"]
+                # Rename columns properly
+                transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
 
                 # Display the transformed data
                 st.write("Transformed Data:")
