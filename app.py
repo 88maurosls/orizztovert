@@ -12,19 +12,19 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
     col_inizio_idx = column_index_from_string(colonna_inizio) - 1  # Indici 0-based
     col_fine_idx = column_index_from_string(colonna_fine)          # Indici 0-based + 1 per includere la colonna fine
     
-    # Isola le colonne del range specificato
-    taglie_selezionate = df.iloc[:, col_inizio_idx:col_fine_idx]  # Seleziona le colonne del range
-    taglie_selezionate.columns = df.columns[col_inizio_idx:col_fine_idx]  # Mantieni i nomi originali delle colonne
-
+    # Seleziona tutte le colonne, ignorando gli header specifici
+    colonne_range = df.iloc[:, col_inizio_idx:col_fine_idx]  # Range di colonne
+    colonne_range.columns = df.columns[col_inizio_idx:col_fine_idx]  # Mantieni i nomi originali
+    
     # Crea una lista per il dataframe trasposto
     righe = []
-    for _, row in df.iterrows():
-        for colonna in taglie_selezionate.columns:
+    for i, row in df.iterrows():
+        for colonna in colonne_range.columns:
             if not pd.isna(row[colonna]):  # Salta celle vuote
                 righe.append({
-                    "Index": row["Index"],
-                    "Taglia": colonna,
-                    "Quantità": row[colonna]
+                    "Riga Originale": i + 1,  # Aggiungi il numero di riga originale (opzionale)
+                    "Colonna di Riferimento": colonna,
+                    "Valore": row[colonna]
                 })
     
     # Crea un nuovo dataframe
@@ -32,8 +32,8 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
     return df_trasposto
 
 # Interfaccia Streamlit
-st.title("Trasposizione Taglie in Verticale")
-st.write("Carica il tuo file Excel e specifica il range di colonne in cui si trovano le taglie.")
+st.title("Trasposizione Generica di Colonne in Verticale")
+st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre.")
 
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
@@ -50,7 +50,7 @@ if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
         # Salva in un file Excel temporaneo
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            nuovo_df.to_excel(writer, index=False, sheet_name="Taglie Trasposte")
+            nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
         output.seek(0)
         
         # Link per scaricare il file
@@ -58,7 +58,7 @@ if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
         st.download_button(
             label="Scarica il file Excel trasformato",
             data=output,
-            file_name="taglie_trasposte.xlsx",
+            file_name="trasposizione.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     except Exception as e:
