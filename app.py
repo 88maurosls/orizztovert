@@ -40,7 +40,7 @@ st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre 
 st.markdown("### Esempio di input")
 try:
     esempio_img = Image.open("eg.jpg")
-    st.image(esempio_img, caption="Esempio di file Excel", use_column_width=True)
+    st.image(esempio_img, caption="Esempio di file Excel", use_container_width=True)
 except FileNotFoundError:
     st.error("Immagine di esempio non trovata. Assicurati che 'eg.jpg' sia nella directory principale.")
 
