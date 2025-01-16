@@ -31,6 +31,9 @@ if uploaded_file:
             data.columns = data.iloc[header_row]
             data = data[header_row + 1:].reset_index(drop=True)
 
+            # Ensure unique column names
+            data.columns = pd.io.parsers.ParserBase({'names': data.columns})._maybe_dedup_names(data.columns)
+
             # Validate column range
             start_idx = ord(start_col.upper()) - 65
             end_idx = ord(end_col.upper()) - 65 + 1
