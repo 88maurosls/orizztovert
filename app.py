@@ -17,12 +17,15 @@ if uploaded_file:
         sheet_name = st.selectbox("Select the sheet to process", excel_data.sheet_names)
         data = excel_data.parse(sheet_name)
 
-        # Display the preview of the data
+        # Add a row with column letters at the top
+        column_letters = [chr(65 + i) for i in range(len(data.columns))]
+        data_with_letters = pd.DataFrame([column_letters], columns=data.columns).append(data, ignore_index=True)
+
         st.write("Preview of the data:")
-        st.dataframe(data.head())
+        st.dataframe(data_with_letters.head())
 
         # Inputs for header row and column ranges
-        header_row = st.number_input("Enter the header row number (0-indexed)", min_value=0, max_value=len(data)-1, step=1)
+        header_row = st.number_input("Enter the header row number (0-indexed, excluding the added letters row)", min_value=1, max_value=len(data_with_letters)-1, step=1)
         start_col = st.text_input("Enter the column letter where sizes start (e.g., 'C')")
         end_col = st.text_input("Enter the column letter where sizes end (e.g., 'Z')")
 
@@ -36,26 +39,13 @@ if uploaded_file:
             end_idx = ord(end_col.upper()) - 65 + 1
 
             if 0 <= start_idx < len(data.columns) and 0 <= end_idx <= len(data.columns):
-                # Extract the relevant columns for melting
-                id_vars = data.columns[:start_idx]
-                value_vars = data.columns[start_idx:end_idx]
-
-                # Use original headers for 'Size'
-                size_headers = list(value_vars)
-
                 # Transform the data
                 transformed_data = data.melt(
-                    id_vars=id_vars,
-                    value_vars=value_vars,
+                    id_vars=data.columns[:start_idx],
+                    value_vars=data.columns[start_idx:end_idx],
                     var_name='Size',
                     value_name='Quantity'
                 ).dropna()
-
-                # Map 'Size' column to original headers
-                transformed_data['Size'] = transformed_data['Size'].apply(lambda x: size_headers[value_vars.get_loc(x)] if x in value_vars else x)
-
-                # Rename columns properly
-                transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
 
                 # Display the transformed data
                 st.write("Transformed Data:")
@@ -65,6 +55,7 @@ if uploaded_file:
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     transformed_data.to_excel(writer, index=False, sheet_name='Transformed')
+                    writer.save()
                 output.seek(0)
 
                 st.download_button(
