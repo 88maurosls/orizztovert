@@ -18,8 +18,6 @@ if uploaded_file:
         data = excel_data.parse(sheet_name)
 
         # Display column letters for better identification
-        data.columns = [f"{col}" for i, col in enumerate(data.columns)]
-
         st.write("Preview of the data:")
         st.dataframe(data.head())
 
@@ -50,8 +48,8 @@ if uploaded_file:
                     value_name='Quantity'
                 ).dropna()
 
-                # Ensure Size column reflects the correct header values
-                transformed_data['Size'] = transformed_data['Size'].astype(str)
+                # Map Size column to header values
+                transformed_data['Size'] = transformed_data['Size'].apply(lambda x: x if isinstance(x, str) else str(x))
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
