@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 from openpyxl.utils import column_index_from_string
+from PIL import Image
 
 # Funzione per trasporre taglie da un range di colonne
 def trasponi_taglie(file, colonna_inizio, colonna_fine):
@@ -35,15 +36,13 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
 st.title("Trasposizione di Colonne Taglie in Verticale")
 st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre (es. taglie). Le altre colonne rimarranno invariate.")
 
-# Esempio di file da scaricare
-st.markdown("### Esempio di file")
-with open("eg.jpg", "rb") as file_example:
-    st.download_button(
-        label="Scarica il file di esempio",
-        data=file_example,
-        file_name="eg.jpg",
-        mime="image/jpeg"
-    )
+# Visualizza un'immagine di esempio
+st.markdown("### Esempio di input")
+try:
+    esempio_img = Image.open("eg.jpg")
+    st.image(esempio_img, caption="Esempio di file Excel", use_column_width=True)
+except FileNotFoundError:
+    st.error("Immagine di esempio non trovata. Assicurati che 'eg.jpg' sia nella directory principale.")
 
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
