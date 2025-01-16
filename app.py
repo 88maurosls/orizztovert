@@ -4,7 +4,7 @@ import io
 from openpyxl.utils import column_index_from_string
 
 # Funzione per trasporre taglie da un range di colonne
-def trasponi_taglie(file, colonna_inizio, colonna_fine, colonna_identificativa):
+def trasponi_taglie(file, colonna_inizio, colonna_fine):
     # Leggi il file Excel
     df = pd.read_excel(file, engine="openpyxl")
     
@@ -12,31 +12,27 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine, colonna_identificativa):
     col_inizio_idx = column_index_from_string(colonna_inizio) - 1  # Indici 0-based
     col_fine_idx = column_index_from_string(colonna_fine)          # Indici 0-based + 1 per includere la colonna fine
     
-    # Seleziona le colonne del range
-    colonne_range = df.iloc[:, col_inizio_idx:col_fine_idx]
-    colonne_range.columns = df.columns[col_inizio_idx:col_fine_idx]
-    
-    # Ottieni la colonna identificativa
-    colonna_id = df[colonna_identificativa]
-    
+    # Separa le colonne delle taglie e quelle rimanenti
+    colonne_taglie = df.iloc[:, col_inizio_idx:col_fine_idx]  # Range di colonne per le taglie
+    altre_colonne = df.iloc[:, :col_inizio_idx].join(df.iloc[:, col_fine_idx:])  # Colonne fuori dal range
+
     # Crea una lista per il dataframe trasposto
     righe = []
-    for i, row in df.iterrows():
-        for colonna in colonne_range.columns:
+    for _, row in df.iterrows():
+        for colonna in colonne_taglie.columns:
             if not pd.isna(row[colonna]):  # Salta celle vuote
-                righe.append({
-                    colonna_identificativa: row[colonna_identificativa],  # Valore effettivo della colonna identificativa
-                    "Colonna di Riferimento": colonna,
-                    "Valore": row[colonna]
-                })
-    
+                riga = {col: row[col] for col in altre_colonne.columns}  # Copia tutte le altre colonne
+                riga["Taglia"] = colonna  # Aggiungi la colonna trasposta
+                riga["Quantità"] = row[colonna]  # Valore corrispondente
+                righe.append(riga)
+
     # Crea un nuovo dataframe
     df_trasposto = pd.DataFrame(righe)
     return df_trasposto
 
 # Interfaccia Streamlit
-st.title("Trasposizione Generica di Colonne in Verticale")
-st.write("Carica il tuo file Excel, specifica il range di colonne da trasporre e scegli una colonna identificativa.")
+st.title("Trasposizione di Colonne Taglie in Verticale")
+st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre (es. taglie). Le altre colonne rimarranno invariate.")
 
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
@@ -45,13 +41,10 @@ file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 colonna_inizio = st.text_input("Colonna di inizio (es. C)")
 colonna_fine = st.text_input("Colonna di fine (es. Y)")
 
-# Input per specificare la colonna identificativa
-colonna_identificativa = st.text_input("Nome della colonna identificativa (es. Index)")
-
-if file and colonna_inizio and colonna_fine and colonna_identificativa and st.button("Trasponi"):
+if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
     try:
         # Trasforma il file e crea il nuovo dataframe
-        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, colonna_identificativa)
+        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine)
         
         # Salva in un file Excel temporaneo
         output = io.BytesIO()
