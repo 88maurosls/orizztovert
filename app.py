@@ -46,6 +46,9 @@ if uploaded_file:
                     value_name='Quantity'
                 ).dropna()
 
+                # Ensure headers are correctly set
+                transformed_data.columns = ["Index", "Total", "Size", "Quantity"]
+
                 # Display the transformed data
                 st.write("Transformed Data:")
                 st.dataframe(transformed_data.head())
