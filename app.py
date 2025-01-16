@@ -31,9 +31,6 @@ if uploaded_file:
             data.columns = data.iloc[header_row]
             data = data[header_row + 1:].reset_index(drop=True)
 
-            # Ensure unique column names by appending suffixes to duplicates
-            data.columns = pd.Series(data.columns).apply(lambda x: f"{x}_" if pd.Series(data.columns).duplicated().any() else x)
-
             # Validate column range
             start_idx = ord(start_col.upper()) - 65
             end_idx = ord(end_col.upper()) - 65 + 1
@@ -51,8 +48,10 @@ if uploaded_file:
                     value_name='Quantity'
                 ).dropna()
 
-                # Ensure Size column reflects the correct header values (using original header row)
-                transformed_data['Size'] = transformed_data['Size'].astype(str)
+                # Ensure Size column reflects the correct header values (using original header row values)
+                size_headers = list(data.iloc[header_row, start_idx:end_idx])
+                size_mapping = {val: size_headers[i] for i, val in enumerate(value_vars)}
+                transformed_data['Size'] = transformed_data['Size'].map(size_mapping)
 
                 # Rename columns properly
                 transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
