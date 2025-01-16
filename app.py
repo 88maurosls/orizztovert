@@ -54,7 +54,6 @@ if uploaded_file:
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     transformed_data.to_excel(writer, index=False, sheet_name='Transformed')
-                    writer.save()
                 output.seek(0)
 
                 st.download_button(
