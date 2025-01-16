@@ -18,7 +18,7 @@ if uploaded_file:
         data = excel_data.parse(sheet_name)
 
         # Display column letters for better identification
-        data.columns = [f"{col} (Column {chr(65 + i)})" for i, col in enumerate(data.columns)]
+        data.columns = [f"{col}" for i, col in enumerate(data.columns)]
 
         st.write("Preview of the data:")
         st.dataframe(data.head())
