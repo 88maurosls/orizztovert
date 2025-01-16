@@ -31,33 +31,24 @@ if uploaded_file:
             data.columns = data.iloc[header_row]
             data = data[header_row + 1:].reset_index(drop=True)
 
-            # Ensure unique column names by appending suffixes to duplicates
-            data.columns = pd.Series(data.columns).apply(lambda x: f"{x}_" if pd.Series(data.columns).duplicated().any() else x)
-
             # Validate column range
             start_idx = ord(start_col.upper()) - 65
             end_idx = ord(end_col.upper()) - 65 + 1
 
             if 0 <= start_idx < len(data.columns) and 0 <= end_idx <= len(data.columns):
-                # Correctly extract the relevant columns for melting
-                id_vars = list(data.columns[:start_idx])
-                value_vars = list(data.columns[start_idx:end_idx])
+                # Extract column names as size headers
+                size_headers = data.columns[start_idx:end_idx]
 
                 # Transform the data
                 transformed_data = data.melt(
-                    id_vars=id_vars,
-                    value_vars=value_vars,
+                    id_vars=data.columns[:start_idx],
+                    value_vars=size_headers,
                     var_name='Size',
                     value_name='Quantity'
                 ).dropna()
 
-                # Directly use column names as sizes
-                size_headers = data.iloc[header_row, start_idx:end_idx].values
-                size_mapping = {val: size_headers[i] for i, val in enumerate(value_vars)}
-                transformed_data['Size'] = transformed_data['Size'].map(size_mapping)
-
                 # Rename columns properly
-                transformed_data.rename(columns={id_vars[0]: "Index", id_vars[1]: "Total"}, inplace=True)
+                transformed_data.rename(columns={data.columns[0]: "Index", data.columns[1]: "Total"}, inplace=True)
 
                 # Display the transformed data
                 st.write("Transformed Data:")
