@@ -49,7 +49,7 @@ file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 
 # Input per specificare la riga dell'header
 riga_header_excel = st.number_input(
-    "Riga dell'header Excel", 
+    "Riga dell'header (numerazione Excel: 1 = prima riga, 2 = seconda riga, ecc.)", 
     min_value=1, 
     value=1, 
     step=1,
@@ -60,8 +60,8 @@ riga_header_excel = st.number_input(
 riga_header = riga_header_excel - 1
 
 # Input per specificare il range di colonne
-colonna_inizio = st.text_input("Colonna di inizio taglie (es. C)")
-colonna_fine = st.text_input("Colonna di fine taglie (es. Y)")
+colonna_inizio = st.text_input("Colonna di inizio (es. C)")
+colonna_fine = st.text_input("Colonna di fine (es. Y)")
 
 # Preview del range selezionato
 if file and colonna_inizio and colonna_fine:
@@ -85,7 +85,8 @@ if file and colonna_inizio and colonna_fine:
     except Exception as e:
         st.warning(f"Impossibile mostrare la preview: {e}")
 
-if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
+# Elabora e scarica direttamente
+if file and colonna_inizio and colonna_fine:
     try:
         # Trasforma il file e crea il nuovo dataframe
         nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
@@ -96,7 +97,7 @@ if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
             nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
         output.seek(0)
         
-        # Link per scaricare il file
+        # Pulsante per scaricare il file (pronto subito)
         st.success("File trasformato con successo!")
         st.download_button(
             label="Scarica il file Excel trasformato",
