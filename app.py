@@ -32,6 +32,12 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header):
     df_trasposto = pd.DataFrame(righe)
     return df_trasposto
 
+# Inizializza session_state
+if 'file_elaborato' not in st.session_state:
+    st.session_state.file_elaborato = None
+if 'parametri_precedenti' not in st.session_state:
+    st.session_state.parametri_precedenti = None
+
 # Interfaccia Streamlit
 st.title("Trasposizione di Colonne Taglie in Verticale")
 st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre (es. taglie). Le altre colonne rimarranno invariate.")
@@ -88,22 +94,31 @@ if file and colonna_inizio and colonna_fine:
 # Elabora e scarica con spinner
 if file and colonna_inizio and colonna_fine:
     try:
-        # Mostra spinner durante l'elaborazione
-        with st.spinner('⏳ Elaborazione in corso... Sto trasponendo le taglie...'):
-            # Trasforma il file e crea il nuovo dataframe
-            nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
-            
-            # Salva in un file Excel temporaneo
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine="openpyxl") as writer:
-                nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
-            output.seek(0)
+        # Crea una chiave univoca per i parametri correnti
+        parametri_correnti = f"{file.name}_{riga_header}_{colonna_inizio}_{colonna_fine}"
         
-        # Pulsante per scaricare il file (pronto subito)
+        # Elabora solo se i parametri sono cambiati
+        if st.session_state.parametri_precedenti != parametri_correnti:
+            # Mostra spinner durante l'elaborazione
+            with st.spinner('⏳ Elaborazione in corso... Sto trasponendo le taglie...'):
+                # Trasforma il file e crea il nuovo dataframe
+                nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
+                
+                # Salva in un file Excel temporaneo
+                output = io.BytesIO()
+                with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                    nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
+                output.seek(0)
+                
+                # Salva in session_state
+                st.session_state.file_elaborato = output.getvalue()
+                st.session_state.parametri_precedenti = parametri_correnti
+        
+        # Mostra il pulsante di download
         st.success("✅ File trasformato con successo!")
         st.download_button(
             label="📥 Scarica il file Excel trasformato",
-            data=output,
+            data=st.session_state.file_elaborato,
             file_name="trasposizione.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
