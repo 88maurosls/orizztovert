@@ -55,7 +55,7 @@ file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 
 # Input per specificare la riga dell'header
 riga_header_excel = st.number_input(
-    "Riga dell'header Excel", 
+    "Riga dell'header Excel (ex. 1)", 
     min_value=1, 
     value=1, 
     step=1,
