@@ -85,7 +85,7 @@ if file and colonna_inizio and colonna_fine:
     except Exception as e:
         st.warning(f"Impossibile mostrare la preview: {e}")
 
-if file and colonna_inizio and colonna_fine and st.button("Trasponi e scarica Excel"):
+if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
     try:
         # Trasforma il file e crea il nuovo dataframe
         nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
