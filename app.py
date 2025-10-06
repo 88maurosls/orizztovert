@@ -85,25 +85,27 @@ if file and colonna_inizio and colonna_fine:
     except Exception as e:
         st.warning(f"Impossibile mostrare la preview: {e}")
 
-# Elabora e scarica direttamente
+# Elabora e scarica con spinner
 if file and colonna_inizio and colonna_fine:
     try:
-        # Trasforma il file e crea il nuovo dataframe
-        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
-        
-        # Salva in un file Excel temporaneo
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
-        output.seek(0)
+        # Mostra spinner durante l'elaborazione
+        with st.spinner('⏳ Elaborazione in corso... Sto trasponendo le taglie...'):
+            # Trasforma il file e crea il nuovo dataframe
+            nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
+            
+            # Salva in un file Excel temporaneo
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                nuovo_df.to_excel(writer, index=False, sheet_name="Trasposizione")
+            output.seek(0)
         
         # Pulsante per scaricare il file (pronto subito)
-        st.success("File trasformato con successo!")
+        st.success("✅ File trasformato con successo!")
         st.download_button(
-            label="Scarica il file Excel trasformato",
+            label="📥 Scarica il file Excel trasformato",
             data=output,
             file_name="trasposizione.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     except Exception as e:
-        st.error(f"Errore durante la trasformazione: {e}")
+        st.error(f"❌ Errore durante la trasformazione: {e}")
