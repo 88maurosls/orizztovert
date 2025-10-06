@@ -66,7 +66,7 @@ colonna_fine = st.text_input("Colonna di fine (es. Y)")
 # Preview del range selezionato
 if file and colonna_inizio and colonna_fine:
     try:
-        st.markdown("### 📋 Preview del range selezionato")
+        st.markdown("### 📋 Preview del file")
         
         # Leggi il file con l'header specificato
         df_preview = pd.read_excel(file, engine="openpyxl", header=riga_header)
@@ -78,18 +78,9 @@ if file and colonna_inizio and colonna_fine:
         # Mostra informazioni sul range
         st.info(f"**Header dalla riga Excel:** {riga_header_excel} | **Range colonne:** {colonna_inizio} - {colonna_fine}")
         
-        # Mostra le prime righe del dataframe completo
-        st.write("**Anteprima file completo (prime 5 righe):**")
-        st.dataframe(df_preview.head())
-        
-        # Evidenzia le colonne del range selezionato
-        colonne_taglie = df_preview.iloc[:, col_inizio_idx:col_fine_idx]
-        st.write(f"**Colonne da trasporre ({len(colonne_taglie.columns)} colonne):**")
-        st.dataframe(colonne_taglie.head())
-        
-        # Mostra i nomi delle colonne che verranno trasposte
-        st.write("**Nomi delle taglie che verranno create:**")
-        st.write(", ".join([str(col) for col in colonne_taglie.columns]))
+        # Mostra tutto il dataframe
+        st.write(f"**Anteprima file completo ({len(df_preview)} righe):**")
+        st.dataframe(df_preview)
         
     except Exception as e:
         st.warning(f"Impossibile mostrare la preview: {e}")
