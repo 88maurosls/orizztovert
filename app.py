@@ -60,8 +60,8 @@ riga_header_excel = st.number_input(
 riga_header = riga_header_excel - 1
 
 # Input per specificare il range di colonne
-colonna_inizio = st.text_input("Colonna di inizio (es. C)")
-colonna_fine = st.text_input("Colonna di fine (es. Y)")
+colonna_inizio = st.text_input("Colonna di inizio taglie (es. C)")
+colonna_fine = st.text_input("Colonna di fine taglie (es. Y)")
 
 # Preview del range selezionato
 if file and colonna_inizio and colonna_fine:
