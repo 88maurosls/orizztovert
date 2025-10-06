@@ -5,9 +5,9 @@ from openpyxl.utils import column_index_from_string
 from PIL import Image
 
 # Funzione per trasporre taglie da un range di colonne
-def trasponi_taglie(file, colonna_inizio, colonna_fine):
-    # Leggi il file Excel
-    df = pd.read_excel(file, engine="openpyxl")
+def trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header):
+    # Leggi il file Excel specificando la riga dell'header
+    df = pd.read_excel(file, engine="openpyxl", header=riga_header)
     
     # Converti i riferimenti delle colonne (lettere) in indici numerici
     col_inizio_idx = column_index_from_string(colonna_inizio) - 1  # Indici 0-based
@@ -16,7 +16,7 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
     # Separa le colonne delle taglie e quelle rimanenti
     colonne_taglie = df.iloc[:, col_inizio_idx:col_fine_idx]  # Range di colonne per le taglie
     altre_colonne = df.iloc[:, :col_inizio_idx].join(df.iloc[:, col_fine_idx:])  # Colonne fuori dal range
-
+    
     # Crea una lista per il dataframe trasposto
     righe = []
     for _, row in df.iterrows():
@@ -27,7 +27,7 @@ def trasponi_taglie(file, colonna_inizio, colonna_fine):
                 riga["Taglia"] = colonna  # Nome della colonna trasposta
                 riga["Quantità"] = row[colonna]  # Valore corrispondente
                 righe.append(riga)
-
+    
     # Crea un nuovo dataframe
     df_trasposto = pd.DataFrame(righe)
     return df_trasposto
@@ -47,6 +47,18 @@ except FileNotFoundError:
 # Caricamento del file Excel
 file = st.file_uploader("Carica il file Excel", type=["xlsx"])
 
+# Input per specificare la riga dell'header
+riga_header_excel = st.number_input(
+    "Riga dell'header (numerazione Excel: 1 = prima riga, 2 = seconda riga, ecc.)", 
+    min_value=1, 
+    value=1, 
+    step=1,
+    help="Specifica in quale riga si trovano i nomi delle colonne (es. se in Excel è riga 7, inserisci 7)"
+)
+
+# Converti in indice 0-based per pandas
+riga_header = riga_header_excel - 1
+
 # Input per specificare il range di colonne
 colonna_inizio = st.text_input("Colonna di inizio (es. C)")
 colonna_fine = st.text_input("Colonna di fine (es. Y)")
@@ -54,7 +66,7 @@ colonna_fine = st.text_input("Colonna di fine (es. Y)")
 if file and colonna_inizio and colonna_fine and st.button("Trasponi"):
     try:
         # Trasforma il file e crea il nuovo dataframe
-        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine)
+        nuovo_df = trasponi_taglie(file, colonna_inizio, colonna_fine, riga_header)
         
         # Salva in un file Excel temporaneo
         output = io.BytesIO()
