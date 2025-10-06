@@ -39,7 +39,7 @@ if 'parametri_precedenti' not in st.session_state:
     st.session_state.parametri_precedenti = None
 
 # Interfaccia Streamlit
-st.title("Trasposizione di Colonne Taglie in Verticale")
+st.title("Trasposizione di Colonne Taglie in Verticale v.1.2")
 st.write("Carica il tuo file Excel e specifica il range di colonne da trasporre (es. taglie). Le altre colonne rimarranno invariate. NB: Eventuali filtri sul file di origine non verranno considerati e dovranno essere riapplicati sul nuovo file generato.")
 
 # Visualizza un'immagine di esempio
